@@ -13,7 +13,7 @@
  * @license  http://www.opensource.org/licenses/mit-license.php  MIT License
  * @version  SVN: <svn_id>
  * @link     https://github.com/jschildgen/ical4openhab
- * @example  php /path/to/ical.php DTSTART 900 http://url.to.ical/file.ics
+ * @example  php /path/to/ical.php DTSTART
  */
 
  /** the time in seconds in which the ical file is re-downloaded from the web **/
