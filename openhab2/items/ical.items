@@ -1,0 +1,2 @@
+String iCalStart "iCalStart [%s]" (All) {channel="exec:command:icalstart:output"} 
+String iCalEnd "iCalEnd [%s]" (All) {channel="exec:command:icalend:output"}

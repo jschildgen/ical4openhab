@@ -1,0 +1,2 @@
+Thing exec:command:icalstart [command="php /home/pi/ical/ical.php DTSTART", interval=60, timeout=30]
+Thing exec:command:icalend [command="php /home/pi/ical/ical.php DTEND", interval=60, timeout=30]
