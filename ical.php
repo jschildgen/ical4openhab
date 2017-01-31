@@ -22,12 +22,13 @@
  $ical_url = "http://your/calendar/url/here.ics";
  /** the events are shown $offset seconds after the events actually starts; e.g., $offset = -3600; to show an event one hour before it starts **/
  $offset = 0;
+ $debug = false;
 
 
 /**************************/
 
 if(count($argv) < 2 || !($argv[1] == 'DTSTART' || $argv[1] == 'DTEND')) {
-  echo "Usage: php /path/to/ical.php DTSTART|DTEND refresh_seconds ical_url [offset]";
+  echo "Usage: php /path/to/ical.php DTSTART|DTEND";
   die();
 }
 
@@ -58,7 +59,7 @@ $next_events = array();
 
 foreach($ical->events() as $event) {
   //print_r($event); continue;
-  debug("===> ".$event["SUMMARY"]);
+  debug("===> ".$event["SUMMARY"]."      (".$event["UID"].")");
 
   $time = $ical->iCalDateToUnixTimestamp($event[$argv[1]])+$offset;
 
@@ -95,6 +96,14 @@ foreach($ical->events() as $event) {
           case 'FR': $byday[] = 5; break;
           case 'SA': $byday[] = 6; break;
         }
+      }
+      /* the event ends on another day as it starts => adjust weekday */
+      if($argv[1] == 'DTEND') {
+        $tmp_enddate = date("Y-m-d", $ical->iCalDateToUnixTimestamp($event["DTEND"])+$offset);
+        $tmp_startdate = date("Y-m-d", $ical->iCalDateToUnixTimestamp($event["DTSTART"])+$offset);
+        $adjust_days = round((strtotime("$tmp_enddate 12:00")-strtotime("$tmp_startdate 12:00"))/86400);
+        debug("adjust_days: ".$adjust_days);
+        foreach($byday as $k=>$v) { $byday[$k] += $adjust_days; while($byday[$k] > 6) { $byday[$k]-=7; } }
       }
       debug("byday: ".implode(",",$byday));
     }
@@ -196,7 +205,9 @@ $next_event_datetime = date("Y-m-d H:i", $next_event_time);
 echo ($next_event_datetime==date("Y-m-d H:i")?"NOW!":$next_event_datetime)." ".$next_event;
 
 function debug($str) {
-  //echo $str."\n";
+  global $debug;
+  if(!$debug) { return; }
+  echo $str."\n";
 }
 
 /**
@@ -219,3 +230,4 @@ function str_between($a, $z, $string){
   $t = substr($t, 0, $endpos);
  return $t;
 }
+
