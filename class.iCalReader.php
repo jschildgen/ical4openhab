@@ -200,7 +200,7 @@ class ICal
     public function iCalDateToUnixTimestamp($icalDate)
     {
         $offset = 0;
-        if(strpos($icalDate,'Z') !== FALSE) { $offset = 60*60; }
+        if(strpos($icalDate,'Z') !== FALSE) { $offset = (date("O")/100)*60*60; }
 
         $icalDate = str_replace('T', '', $icalDate);
         $icalDate = str_replace('Z', '', $icalDate);
