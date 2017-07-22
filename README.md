@@ -2,7 +2,7 @@
 The script returns the date and title of the event in an ical file that starts or ends next. For OpenHAB 2. 
 
 ## How to use
-- is the php command-line interface installed on your system? (try "man php" in console)
+- is the php command-line interface installed on your system? (try "man php" in console; if not installed: apt-get install php5-cli)
 - Store the php files of this project somewhere (e.g., /home/pi/ical)
 - Write the url to the ics (either local or http) to the ical.php file
 - Try: php /home/pi/ical/ical.php DTSTART
