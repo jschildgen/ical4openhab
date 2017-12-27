@@ -14,6 +14,8 @@ The script opens an ical file on the file system or downloads a ical file from t
 ## Using in OpenHAB
 You need two things (using the Exec binding), two items and two rules. The things call the php script every minute. The result (the next event that starts or ends) is stored in the two items iCalStart and iCalEnd. The rules are fired when the items change its states. This is the case when a new event is added to the calendar which starts/ends before the former event, or if the event starts/ends now ("NOW! " prefix), or if its start or end is just over. Then the next event is shown.
 
+You can define the things and items with the Paper UI (see below) or via files:
+
 things/ical.things
 
     Thing exec:command:icalstart [command="php /home/pi/ical/ical.php DTSTART", interval=60, timeout=30]
@@ -65,6 +67,14 @@ The events in the calendar have to use scene names, which are defined in the rul
 
 It's okay, if a scene is only in the "start" section. Then nothing is done when the event ends.
 
+## Using in OpenHAB Paper UI
+You can define the Things and Items with the Paper UI:
+1. Add a new Thing, chose Exec Binding -> Command
+2. Name: iCalStart, Command: php /home/pi/ical/ical.php DTSTART, Transform: REGEX((.*)), Interval: 60, Timeout: 30, Autorun: No
+3. Do the same thing with the item iCalEnd, ... ical.php DTEND
+4. Click on the Thing's Channel "Output" and create a new String item iCalStart / iCalEnd
+5. Create the rules as above: when Item iCalStart changed then ...
+
 ## Connecting to a Google Calendar
 Click on the little arrow on your calendar in the calendar list on the left. Click settings and then the ical button at "Private Address". There you find the URL to an ical containing all events of that calendar.
 
@@ -79,7 +89,6 @@ Click on the little arrow on your calendar in the calendar list on the left. Cli
 
 ## Future Work
 - Support daily, monthly and yearly events. Currently only one-time events and weekly events are supported. The weekly events can have arbirary many exceptions and they can repeat n times or untial a specific date. Weekly events must be every week (not every two weeks etc.). If you want to make a daily event, create a weekly one and set the days to MO,TU,WE,TH,FR,SA,SU ;-)
-- Support timezones
 
 ## Ics-Parser
 ical4openhab uses the Ics-Parser (http://code.google.com/p/ics-parser/); it is a bit modified in this project to support multiple exceptions of repeating events, UTC-timezone events, etc. Maybe, more modifications, especially for time zones must be done. 
