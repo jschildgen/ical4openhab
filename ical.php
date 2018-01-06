@@ -83,6 +83,7 @@ foreach($ical->events() as $event) {
   }
 
   $time = $ical->iCalDateToUnixTimestamp($event[$argv[1]])+$offset;
+  $time_dtstart = $ical->iCalDateToUnixTimestamp($event['DTSTART']);
 
     /* a one-time event */
     if(!isset($event['RRULE'])) {
@@ -151,7 +152,7 @@ foreach($ical->events() as $event) {
     }
     debug("exceptions: ".implode(",",array_keys($exceptions)));
 
-    /* an n-times repeated event */
+    debug('an n-times repeated event');
     if(strpos($event['RRULE'],";COUNT=") !== FALSE) {
       $count = str_between(";COUNT=",";",$event['RRULE']);
       debug("count: $count");
@@ -159,17 +160,18 @@ foreach($ical->events() as $event) {
         if(in_array(date("w",$time),$byday)) {
           $counted++;
         }
-        if($time >= $now && !array_key_exists($time,$exceptions) && in_array(date("w",$time),$byday)) {
+        if($time >= $now && !array_key_exists($time_dtstart,$exceptions) && in_array(date("w",$time_dtstart),$byday)) {
           $event["NEXT"] = $time;
           $next_events[] = $event;
           debug("next: ".date("d.m.Y H:i",$time));
           break;
         }
+	$time_dtstart = strtotime(date("Y-m-d H:i",$time_dtstart)." + 1 days");
       }
       continue;
     }
 
-    /* an event repeated until a specific day */
+    debug('an event repeated until a specific day');
     if(strpos($event['RRULE'],";UNTIL=") !== FALSE) {
       $until = $ical->iCalDateToUnixTimestamp(str_between(";UNTIL=",";",$event['RRULE']));
       debug("until: ".date("d.m.Y H:i",$until));
@@ -179,28 +181,30 @@ foreach($ical->events() as $event) {
       } else {
         for($time = $time; $time <= $until; $time = strtotime(date("Y-m-d H:i",$time)." + 1 days")) {
           if($time >= $now) {
-            if(array_key_exists($time,$exceptions)) { continue; }
-            if(!in_array(date("w",$time),$byday)) { continue; }
+            if(array_key_exists($time_dtstart,$exceptions)) { continue; }
+            if(!in_array(date("w",$time_dtstart),$byday)) { continue; }
             $event["NEXT"] = $time;
             $next_events[] = $event;
             debug("next: ".date("d.m.Y H:i",$time));
             break;
-          }
+	  }
+	 $time_dtstart = strtotime(date("Y-m-d H:i",$time_dtstart)." + 1 days");
         }
         continue;
       }
     }
 
-    /* an event repeated forever */
+    debug('an event repeated forever');
     for($time = $time; true; $time = strtotime(date("Y-m-d H:i",$time)." + 1 days")) {
       if($time >= $now) {
-        if(array_key_exists($time,$exceptions)) { continue; }
-        if(!in_array(date("w",$time),$byday)) { continue; }
+        if(array_key_exists($time_dtstart,$exceptions)) { continue; }
+        if(!in_array(date("w",$time_dtstart),$byday)) { break; }
         $event["NEXT"] = $time;
         $next_events[] = $event;
         debug("next: ".date("d.m.Y H:i",$time));
         break;
       }
+      $time_dtstart = strtotime(date("Y-m-d H:i",$time_dtstart)." + 1 days");
     }
     continue;
 }
